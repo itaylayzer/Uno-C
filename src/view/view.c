@@ -67,20 +67,20 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
 
     DrawRectangleRounded((Rectangle){x, y, size, size * height_multiplier}, 0.2f, 10, background);
 
-    DrawTexturePro(uno_texture, (Rectangle){calculateTextureX(textind), calculateTextureY(textind), text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){background.a, background.a, background.a, 255});
     number > 9 &&
         (DrawTexturePro(txt_header, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){Outline.r, Outline.g, Outline.b, 255}), 1);
 
     DrawTexturePro(txt_outline, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){255, 255, 255, 255});
+    DrawTexturePro(uno_texture, (Rectangle){calculateTextureX(textind), calculateTextureY(textind), text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){background.a, background.a, background.a, 255});
 }
 void displayGame(GameState state)
 {
-    DBLIST pnode = state->player;
+    DBLIST pnode = state->player.arr;
     int selected = 0;
 
     {
         ubyte offset = 0;
-        for (offset = 0; offset * 2 < state->pcount - 1; offset++)
+        for (offset = 0; offset * 2 < state->player.size - 1; offset++)
         {
             pnode = pnode->next;
             selected++;
@@ -137,18 +137,18 @@ void displayGame(GameState state)
             selected += (positive ? 1 : -1) * (num_key_down(1, ONE) + num_key_down(2, TWO) + num_key_down(3, THREE) + num_key_down(4, FOUR) + num_key_down(5, FIVE) + num_key_down(6, SIX) + num_key_down(7, SEVEN) + num_key_down(8, EIGHT) + num_key_down(9, NINE));
 
             selected += -5 * IsKeyPressed(KEY_G) - IsKeyPressed(KEY_H) + IsKeyPressed(KEY_J) + 5 * IsKeyPressed(KEY_K);
-            selected = clamp(selected, 0, state->pcount - 1);
-            // printf("selected = %d | state->pcount = %d\n", selected, state->pcount);
+            selected = clamp(selected, 0, state->player.size - 1);
+            printf("selected = %d | state->pcount = %d\n", selected, state->player.size);
             bool _pos = (select_addon = selected - old_select) > 0;
 
-            // printf("\tselect_addon = %d\n", select_addon);
+            printf("\tselect_addon = %d\n", select_addon);
             select_addon = abs(select_addon);
             while (select_addon--)
             {
                 DBLIST nodes[] = {pnode->prev, pnode->next};
                 pnode = nodes[_pos];
             }
-            // printf("\tpnode->val = %d (%d)\n", pnode->val & 0x0F, pnode->val >> 4);
+            printf("\tpnode->val = %d (%d)\n", pnode->val & 0x0F, pnode->val >> 4);
         }
         // gameplay ----------------------------------------------------------------------------
         {
@@ -184,7 +184,7 @@ void displayGame(GameState state)
         // player cards ----------------------------------------------------------------------------
         unsigned char index;
         DBLIST node;
-        for (index = 0, node = state->player; node; node = node->next, index++)
+        for (index = 0, node = state->player.arr; node; node = node->next, index++)
         {
             // const float hie1 = fabs(fclamp((float)index - lerpSelected, -4.0, 4.0)) / 4;
             const float hie = fabs(fclamp((float)index - lerpSelected, -1.0, 1.0));
@@ -212,10 +212,10 @@ void displayGame(GameState state)
         DrawTexturePro(uno_texture, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y + max_size * 0.1f, max_size * 0.9f, max_size * 0.9f * height_multiplier}, (Vector2){0, 0}, 0, (Color){120, 120, 120, 250});
 
         // draw enemy ----------------------------------------------------------------------------
-        for (unsigned int index = 0; index < state->ecount; index++)
+        for (unsigned int index = 0; index < state->enemy.size; index++)
         {
 
-            const float x = addon + width / 2 - min_size / 2 + index * min_size * 1.2 - (((float)state->ecount - 1) / 2.0f) * max_size;
+            const float x = addon + width / 2 - min_size / 2 + index * min_size * 1.2 - (((float)state->enemy.size - 1) / 2.0f) * max_size;
 
             const float enemyy = min_size - min_size + 10;
             Color tempColor = (Color){200, 55, 55, 255};

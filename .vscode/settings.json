@@ -8,6 +8,8 @@
         "stack.h": "c",
         "dblist.h": "c",
         "typeinfo": "c",
-        "controller.h": "c"
+        "controller.h": "c",
+        "queue.h": "c",
+        "stdlib.h": "c"
     }
 }

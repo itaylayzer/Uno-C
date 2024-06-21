@@ -19,7 +19,7 @@ void vector_shuffle(ubyte *arr, ubyte size)
         arr[rand_offset] = temp;
     }
 }
-void random_stacking(STACK *stk)
+void random_stacking(QUEUE *q)
 {
 
     const ubyte cards[] = {
@@ -151,24 +151,24 @@ void random_stacking(STACK *stk)
 
     for (ubyte offset = 0; offset < count; offset++)
     {
-        stack_push(stk, cards[offset]);
+        enqueue(q, cards[offset]);
     }
 }
 
 void uno_init(GameState state, ubyte start_count)
 {
-    dbl_init(&state->player);
-    dbl_init(&state->enemy);
-    stack_init(&state->stack);
+    dbl_init(&state->player.arr);
+    dbl_init(&state->enemy.arr);
+    queue_init(&state->queue);
 
-    random_stacking(&state->stack);
+    random_stacking(&state->queue);
 
-    state->card = stack_pop(&state->stack);
-    state->pcount = state->ecount = start_count;
+    state->card = dequeue(&state->queue);
+    state->player.size = state->enemy.size = start_count;
 
     while (start_count--)
     {
-        dbl_push(&state->player)->val = (stack_pop(&state->stack));
-        dbl_push(&state->enemy)->val = (stack_pop(&state->stack));
+        dbl_push(&state->player.arr)->val = (dequeue(&state->queue));
+        dbl_push(&state->enemy.arr)->val = (dequeue(&state->queue));
     }
 }

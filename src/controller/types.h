@@ -17,14 +17,18 @@ typedef struct sLinkNode
     ubyte val;
 } sLinkRec, *sNode;
 
+typedef struct
+{
+    ubyte size;
+    dNode arr;
+} Array;
+
 typedef struct stateType
 {
-    dNode player;
-    dNode enemy;
+    Array player;
+    Array enemy;
     ubyte card;
-    ubyte pcount;
-    ubyte ecount;
-    sNode stack;
+    sNode queue;
 
 } stateRec, *GameState;
 

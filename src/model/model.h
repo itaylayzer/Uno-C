@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../controller/types.h"
-#include "stack.h"
+#include "queue.h"
 #include "dblist.h"
 
 void uno_init(GameState, ubyte);
