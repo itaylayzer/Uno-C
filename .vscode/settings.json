@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "limits": "c",
+        "*.tcc": "c",
+        "view.h": "c",
+        "stdio.h": "c"
+    }
+}
