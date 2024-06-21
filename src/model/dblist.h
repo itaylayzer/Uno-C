@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define DBLIST dNode
 
 void dbl_init(DBLIST *);
 DBLIST dbl_push(DBLIST *);

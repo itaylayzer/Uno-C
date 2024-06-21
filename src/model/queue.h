@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include "../controller/types.h"
 
-#define QUEUE sNode
-
 void queue_init(QUEUE *);
 void enqueue(QUEUE *, ubyte);
 ubyte dequeue(QUEUE *);

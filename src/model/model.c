@@ -172,3 +172,30 @@ void uno_init(GameState state, ubyte start_count)
         dbl_push(&state->enemy.arr)->val = (dequeue(&state->queue));
     }
 }
+
+// return 1
+ubyte play_endturn(GameState state, Array *arr, DBLIST *node)
+{
+    return 1;
+}
+
+// 2  and above if yes and action
+// 0 if not, 1 end streak mode, 2 if nothing, 3 pick color, 4 start streak mode
+ubyte play_put(GameState state, Array *arr, DBLIST *node)
+{
+    enqueue(&state->queue, state->card);
+    state->card = (*node)->val;
+    // TODO: remove node
+    // *node = dbl_remove(*node);
+    // arr->size--;
+
+    return 0;
+}
+
+// return 2 always
+ubyte play_stack(GameState state, Array *arr, DBLIST *node)
+{
+    dbl_push(&arr->arr)->val = dequeue(&state->queue);
+    arr->size++;
+    return 2;
+}

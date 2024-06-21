@@ -32,4 +32,7 @@ typedef struct stateType
 
 } stateRec, *GameState;
 
+#define QUEUE sNode
+#define DBLIST dNode
+
 #endif

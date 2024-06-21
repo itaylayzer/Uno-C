@@ -152,6 +152,13 @@ void displayGame(GameState state)
         }
         // gameplay ----------------------------------------------------------------------------
         {
+            ubyte (*actions[])(GameState, Array *, DBLIST*) = {NULL, play_stack, play_put, play_endturn, NULL};
+            ubyte action_index = clamp(
+                (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
+
+            ubyte (*selected_action)(GameState, Array *, DBLIST*) = actions[action_index];
+
+            (selected_action) && (selected += selected_action(state, &state->player, &pnode) > 1);
         }
 
         // max_cards = clamp(max_cards + key_pressed(KEY_UP) - key_pressed(KEY_DOWN), 0, 30);
@@ -184,7 +191,7 @@ void displayGame(GameState state)
         // player cards ----------------------------------------------------------------------------
         unsigned char index;
         DBLIST node;
-        for (index = 0, node = state->player.arr; node; node = node->next, index++)
+        for (index = 0, node = state->player.arr; node;)
         {
             // const float hie1 = fabs(fclamp((float)index - lerpSelected, -4.0, 4.0)) / 4;
             const float hie = fabs(fclamp((float)index - lerpSelected, -1.0, 1.0));
@@ -194,6 +201,7 @@ void displayGame(GameState state)
             const float y = height - max_size + -size - 10;
 
             DrawCard(node->val, hie, x, y, size, height_multiplier, uno_texture, txt_header, txt_outline);
+            node = node->next, index++;
         };
 
         // draw bank ----------------------------------------------------------------------------

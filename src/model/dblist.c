@@ -9,7 +9,7 @@ DBLIST dbl_push(DBLIST *list)
     DBLIST temp = malloc(sizeof(dLinkRec));
     temp->next = *list;
     temp->prev = NULL;
-    if (*list != NULL)
+    if ((*list) != NULL)
     {
         (*list)->prev = temp;
     }

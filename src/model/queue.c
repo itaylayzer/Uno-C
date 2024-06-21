@@ -23,11 +23,12 @@ QUEUE insert_first(QUEUE *q)
     return *q;
 }
 // n>1
-QUEUE insert_after(QUEUE *q)
+QUEUE insert_end(QUEUE *q)
 {
     QUEUE temp = malloc(sizeof(sLinkRec));
     temp->next = (*q)->next;
     (*q)->next = temp;
+    *q = temp;
     return temp;
 }
 
@@ -35,7 +36,7 @@ void enqueue(QUEUE *q, ubyte val)
 {
     puts("enqueue");
     QUEUE(*actions[])
-    (QUEUE *) = {insert_after, insert_first};
+    (QUEUE *) = {insert_end, insert_first};
     actions[queue_empty(*q)](q)->val = val;
 }
 
