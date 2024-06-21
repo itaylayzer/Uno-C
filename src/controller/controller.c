@@ -2,5 +2,8 @@
 
 void start_uno()
 {
-    displayGame();
+    stateRec state;
+    srand(time(NULL));
+    uno_init(&state, 7);
+    displayGame(&state);
 }

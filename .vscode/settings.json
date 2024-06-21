@@ -3,6 +3,11 @@
         "limits": "c",
         "*.tcc": "c",
         "view.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "string.h": "c",
+        "stack.h": "c",
+        "dblist.h": "c",
+        "typeinfo": "c",
+        "controller.h": "c"
     }
 }
