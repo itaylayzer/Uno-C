@@ -4,6 +4,12 @@
 #define ubyte unsigned char
 #define byte signed char
 
+#define QUEUE sNode
+#define DBLIST dNode
+
+#define REGION(region) {
+#define ENDREGION }
+
 typedef struct dblLinkNode
 {
     struct dblLinkNode *next;
@@ -32,7 +38,14 @@ typedef struct stateType
 
 } stateRec, *GameState;
 
-#define QUEUE sNode
-#define DBLIST dNode
+typedef enum
+{
+    UNO_RED,
+    UNO_BLUE,
+    UNO_YELLOW,
+    UNO_GREEN,
+    UNO_BLACK
+
+} UNO_COLORS;
 
 #endif

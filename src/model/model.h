@@ -9,6 +9,12 @@
 
 void uno_init(GameState, ubyte);
 
+///////////////////// conditions /////////////////////
+bool condition_true(GameState, DBLIST);
+bool condition_put(GameState, DBLIST);
+
+///////////////////// actions /////////////////////
+
 // return 2
 ubyte play_endturn(GameState, Array *, DBLIST *);
 

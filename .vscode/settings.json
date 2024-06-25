@@ -11,6 +11,7 @@
         "controller.h": "c",
         "queue.h": "c",
         "stdlib.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "model.h": "c"
     }
 }

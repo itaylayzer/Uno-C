@@ -1,4 +1,5 @@
 #include "model.h"
+
 #define cn(color, num) (color << 4) + num
 
 int _random(int lower, int upper)
@@ -164,6 +165,14 @@ void uno_init(GameState state, ubyte start_count)
     random_stacking(&state->queue);
 
     state->card = dequeue(&state->queue);
+
+    // make sure the start card  be a number
+    while ((state->card & 0x0F) / 10)
+    {
+        enqueue(&state->queue, state->card);
+        state->card = dequeue(&state->queue);
+    }
+
     state->player.size = state->enemy.size = start_count;
 
     while (start_count--)
@@ -172,6 +181,21 @@ void uno_init(GameState state, ubyte start_count)
         dbl_push(&state->enemy.arr)->val = (dequeue(&state->queue));
     }
 }
+
+///////////////////// conditions /////////////////////
+bool condition_true(GameState state, DBLIST node)
+{
+    return true;
+}
+bool condition_put(GameState state, DBLIST node)
+{
+    bool same_color = (state->card >> 4) == (node->val >> 4);
+    bool same_number = (state->card & 0x0f) == (node->val & 0x0f);
+    bool black_color = (node->val >> 4) == UNO_BLACK;
+    return same_color || same_number || black_color;
+}
+
+///////////////////// actions /////////////////////
 
 // return 1
 ubyte play_endturn(GameState state, Array *arr, DBLIST *node)

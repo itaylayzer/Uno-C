@@ -73,7 +73,10 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
     DrawTexturePro(txt_outline, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){255, 255, 255, 255});
     DrawTexturePro(uno_texture, (Rectangle){calculateTextureX(textind), calculateTextureY(textind), text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){background.a, background.a, background.a, 255});
 }
-void displayGame(GameState state)
+void displayGame(GameState state,
+                 bool (*conditions[])(GameState, DBLIST),
+                 ubyte (*actions[])(GameState, Array *, DBLIST *))
+
 {
 
     const char *colorsNames[] = {"RED", "BLUE", "YELLOW", "GREEN", "BLACK"};
@@ -93,13 +96,9 @@ void displayGame(GameState state)
     bool is_full = false, positive = true;
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1330, 720, "@ItayL - Uno");
-
     SetWindowMinSize(800, 600);
-
-    {
-        Image icon = LoadImage("./assets/icon.ico");
-        SetWindowIcon(icon);
-    }
+    Image icon = LoadImage("./assets/uno.ico");
+    SetWindowIcon(icon);
 
     Texture2D uno_texture = LoadTexture("./assets/texture.png");
     Texture2D txt_header = LoadTexture("./assets/white.png");
@@ -130,43 +129,43 @@ void displayGame(GameState state)
             pre_state.y = GetWindowPosition().y;
         }
 
-        // gameplay ----------------------------------------------------------------------------
+        REGION(gameplay)
+
+        ubyte action_index = clamp(
+            (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
+
+        bool (*selected_condition)(GameState, DBLIST) = conditions[action_index];
+        ubyte (*selected_action)(GameState, Array *, DBLIST *) = actions[action_index];
+
+        if (selected_action != NULL && selected_condition(state, pnode))
         {
-            ubyte (*actions[])(GameState, Array *, DBLIST *) = {NULL, play_stack, play_put, play_endturn, NULL};
-            ubyte action_index = clamp(
-                (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
-
-            ubyte (*selected_action)(GameState, Array *, DBLIST *) = actions[action_index];
-
-            if (selected_action != NULL)
-            {
-                ubyte action_avl = selected_action(state, &state->player, &pnode);
-                ubyte ret = action_avl & 0x0F;
-                ubyte neg = (action_avl >> 6);
-                selected -= neg * (ret > 1);
-                // printf("selected = %d ret = %d neg %d\n", selected, ret, neg);
-            }
+            ubyte action_avl = selected_action(state, &state->player, &pnode);
+            ubyte ret = action_avl & 0x0F;
+            ubyte neg = (action_avl >> 6);
+            selected -= neg * (ret > 1);
+            // printf("selected = %d ret = %d neg %d\n", selected, ret, neg);
         }
 
-        // movement ----------------------------------------------------------------------------
+        ENDREGION
 
+        REGION(movement)
+
+        int select_addon, old_select = selected;
+
+        selected += -(key_pressed(KEY_LEFT) || key_pressed(KEY_A)) + (key_pressed(KEY_RIGHT) || key_pressed(KEY_D));
+        selected += (positive ? 1 : -1) * (num_key_down(1, ONE) + num_key_down(2, TWO) + num_key_down(3, THREE) + num_key_down(4, FOUR) + num_key_down(5, FIVE) + num_key_down(6, SIX) + num_key_down(7, SEVEN) + num_key_down(8, EIGHT) + num_key_down(9, NINE));
+
+        selected += -5 * IsKeyPressed(KEY_G) - IsKeyPressed(KEY_H) + IsKeyPressed(KEY_J) + 5 * IsKeyPressed(KEY_K);
+        selected = clamp(selected, 0, state->player.size - 1);
+        bool _pos = (select_addon = selected - old_select) > 0;
+
+        select_addon = abs(select_addon);
+        while (select_addon--)
         {
-            int select_addon, old_select = selected;
-
-            selected += -(key_pressed(KEY_LEFT) || key_pressed(KEY_A)) + (key_pressed(KEY_RIGHT) || key_pressed(KEY_D));
-            selected += (positive ? 1 : -1) * (num_key_down(1, ONE) + num_key_down(2, TWO) + num_key_down(3, THREE) + num_key_down(4, FOUR) + num_key_down(5, FIVE) + num_key_down(6, SIX) + num_key_down(7, SEVEN) + num_key_down(8, EIGHT) + num_key_down(9, NINE));
-
-            selected += -5 * IsKeyPressed(KEY_G) - IsKeyPressed(KEY_H) + IsKeyPressed(KEY_J) + 5 * IsKeyPressed(KEY_K);
-            selected = clamp(selected, 0, state->player.size - 1);
-            bool _pos = (select_addon = selected - old_select) > 0;
-
-            select_addon = abs(select_addon);
-            while (select_addon--)
-            {
-                DBLIST nodes[] = {pnode->prev, pnode->next};
-                pnode = nodes[_pos];
-            }
+            DBLIST nodes[] = {pnode->prev, pnode->next};
+            pnode = nodes[_pos];
         }
+        ENDREGION
 
         // max_cards = clamp(max_cards + key_pressed(KEY_UP) - key_pressed(KEY_DOWN), 0, 30);
         lerpSelected = lerp(lerpSelected, (float)selected, 12.0f / fps);
@@ -247,6 +246,7 @@ void displayGame(GameState state)
     UnloadTexture(uno_texture);
     UnloadTexture(txt_header);
     UnloadTexture(txt_outline);
+    UnloadImage(icon);
 
     CloseWindow();
 }
