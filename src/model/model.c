@@ -185,17 +185,41 @@ ubyte play_put(GameState state, Array *arr, DBLIST *node)
 {
     enqueue(&state->queue, state->card);
     state->card = (*node)->val;
-    // TODO: remove node
-    // *node = dbl_remove(*node);
-    // arr->size--;
+    arr->size--;
+    // puts("play_put A");
+    bool is_first = dbl_node_first(*node);
+    bool is_last = dbl_node_last(*node);
 
-    return 0;
+    if (is_first && is_last)
+    {
+        free(*node);
+        arr->arr = *node = NULL;
+        return 2;
+    }
+
+    // puts("play_put B");
+
+    DBLIST next_node[] = {(*node)->next, (*node)->prev};
+    *node = next_node[is_last];
+    DBLIST delete_node[] = {(*node)->prev, (*node)->next};
+
+    // puts("play_put C");
+    dbl_removes(delete_node[is_last]);
+    // puts("play_put D");
+    // printf("is last:%d\n", is_last);
+    is_first && (arr->arr = *node);
+
+    return 2 + (is_last << 6);
 }
 
 // return 2 always
 ubyte play_stack(GameState state, Array *arr, DBLIST *node)
 {
     dbl_push(&arr->arr)->val = dequeue(&state->queue);
+
     arr->size++;
+    (*node) && (*node = (*node)->prev);
+    (!*node) && (*node = arr->arr);
+
     return 2;
 }

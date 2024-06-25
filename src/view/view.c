@@ -75,10 +75,12 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
 }
 void displayGame(GameState state)
 {
+
+    const char *colorsNames[] = {"RED", "BLUE", "YELLOW", "GREEN", "BLACK"};
     DBLIST pnode = state->player.arr;
     int selected = 0;
 
-    {
+    { // go to middle
         ubyte offset = 0;
         for (offset = 0; offset * 2 < state->player.size - 1; offset++)
         {
@@ -128,6 +130,24 @@ void displayGame(GameState state)
             pre_state.y = GetWindowPosition().y;
         }
 
+        // gameplay ----------------------------------------------------------------------------
+        {
+            ubyte (*actions[])(GameState, Array *, DBLIST *) = {NULL, play_stack, play_put, play_endturn, NULL};
+            ubyte action_index = clamp(
+                (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
+
+            ubyte (*selected_action)(GameState, Array *, DBLIST *) = actions[action_index];
+
+            if (selected_action != NULL)
+            {
+                ubyte action_avl = selected_action(state, &state->player, &pnode);
+                ubyte ret = action_avl & 0x0F;
+                ubyte neg = (action_avl >> 6);
+                selected -= neg * (ret > 1);
+                // printf("selected = %d ret = %d neg %d\n", selected, ret, neg);
+            }
+        }
+
         // movement ----------------------------------------------------------------------------
 
         {
@@ -138,33 +158,20 @@ void displayGame(GameState state)
 
             selected += -5 * IsKeyPressed(KEY_G) - IsKeyPressed(KEY_H) + IsKeyPressed(KEY_J) + 5 * IsKeyPressed(KEY_K);
             selected = clamp(selected, 0, state->player.size - 1);
-            printf("selected = %d | state->pcount = %d\n", selected, state->player.size);
             bool _pos = (select_addon = selected - old_select) > 0;
 
-            printf("\tselect_addon = %d\n", select_addon);
             select_addon = abs(select_addon);
             while (select_addon--)
             {
                 DBLIST nodes[] = {pnode->prev, pnode->next};
                 pnode = nodes[_pos];
             }
-            printf("\tpnode->val = %d (%d)\n", pnode->val & 0x0F, pnode->val >> 4);
-        }
-        // gameplay ----------------------------------------------------------------------------
-        {
-            ubyte (*actions[])(GameState, Array *, DBLIST*) = {NULL, play_stack, play_put, play_endturn, NULL};
-            ubyte action_index = clamp(
-                (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
-
-            ubyte (*selected_action)(GameState, Array *, DBLIST*) = actions[action_index];
-
-            (selected_action) && (selected += selected_action(state, &state->player, &pnode) > 1);
         }
 
         // max_cards = clamp(max_cards + key_pressed(KEY_UP) - key_pressed(KEY_DOWN), 0, 30);
         lerpSelected = lerp(lerpSelected, (float)selected, 12.0f / fps);
 
-        // printf("selected: %d | lerpSelected: %f\n", selected, lerpSelected);
+        // // printf("selected: %d | lerpSelected: %f\n", selected, lerpSelected);
 
         // change full screen ----------------------------------------------------------------------------
         // found this solution online
@@ -187,11 +194,11 @@ void displayGame(GameState state)
 
         BeginDrawing();
         ClearBackground((Color){9, 9, 10, 255});
-
         // player cards ----------------------------------------------------------------------------
         unsigned char index;
         DBLIST node;
-        for (index = 0, node = state->player.arr; node;)
+
+        for (index = 0, node = state->player.arr; node; node = node->next, index++)
         {
             // const float hie1 = fabs(fclamp((float)index - lerpSelected, -4.0, 4.0)) / 4;
             const float hie = fabs(fclamp((float)index - lerpSelected, -1.0, 1.0));
@@ -199,10 +206,12 @@ void displayGame(GameState state)
 
             const float x = width / 2 + index * min_size * 1.2 - size / 2 - lerpSelected * max_size;
             const float y = height - max_size + -size - 10;
-
+            // printf("rendering\tnode->val = %d (%s)\n", node->val & 0x0F, colorsNames[node->val >> 4]);
             DrawCard(node->val, hie, x, y, size, height_multiplier, uno_texture, txt_header, txt_outline);
-            node = node->next, index++;
         };
+
+        // printf("selected = %d | state->pcount = %d\n", selected, state->player.size);
+        // (pnode) && // printf("\tpnode->val = %d (%s)\n", pnode->val & 0x0F, colorsNames[pnode->val >> 4]);
 
         // draw bank ----------------------------------------------------------------------------
         float addon = (lerpSelected - (float)selected) * min_size;
@@ -222,7 +231,6 @@ void displayGame(GameState state)
         // draw enemy ----------------------------------------------------------------------------
         for (unsigned int index = 0; index < state->enemy.size; index++)
         {
-
             const float x = addon + width / 2 - min_size / 2 + index * min_size * 1.2 - (((float)state->enemy.size - 1) / 2.0f) * max_size;
 
             const float enemyy = min_size - min_size + 10;

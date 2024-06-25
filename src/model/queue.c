@@ -34,7 +34,7 @@ QUEUE insert_end(QUEUE *q)
 
 void enqueue(QUEUE *q, ubyte val)
 {
-    puts("enqueue");
+    // puts("enqueue");
     QUEUE(*actions[])
     (QUEUE *) = {insert_end, insert_first};
     actions[queue_empty(*q)](q)->val = val;
@@ -43,7 +43,7 @@ void enqueue(QUEUE *q, ubyte val)
 // n=1
 ubyte remove_last(QUEUE *q)
 {
-    puts("\tlast");
+    // puts("\tlast");
 
     ubyte val = (*q)->val;
     free(*q);
@@ -54,7 +54,7 @@ ubyte remove_last(QUEUE *q)
 // n>1
 ubyte remove_after(QUEUE *q)
 {
-    puts("\tafter");
+    // puts("\tafter");
 
     QUEUE temp = (*q)->next;
     (*q)->next = temp->next;
@@ -70,7 +70,7 @@ bool queue_is_last(QUEUE q)
 
 ubyte dequeue(QUEUE *q)
 {
-    puts("dequeue");
+    // puts("dequeue");
 
     ubyte (*actions[])(QUEUE *) = {remove_after, remove_last};
     return actions[queue_is_last(*q)](q);

@@ -6,9 +6,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-
 void dbl_init(DBLIST *);
 DBLIST dbl_push(DBLIST *);
-void dbl_remove_prev(DBLIST *);
 
+bool dbl_node_last(DBLIST);
+bool dbl_node_first(DBLIST);
+
+ubyte dbl_remove_after(DBLIST);
+ubyte dbl_remove_prev(DBLIST);
+void dbl_removes(DBLIST);
 #endif
