@@ -12,6 +12,7 @@
 
 #define num_key_down(num, name) num *(IsKeyPressed(KEY_##name) || IsKeyPressed(KEY_KP_##num))
 
-void displayGame(GameState, bool (*[])(GameState, DBLIST), ubyte (*[])(GameState, Array *, DBLIST *));
-
+void displayGame(GameState,
+                 CONDITION_VARIABLE([]),
+                 ACTION_VARIABLE([]));
 #endif

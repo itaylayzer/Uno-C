@@ -14,9 +14,9 @@ first of all git clone this repository. then you can compile and run with gcc. f
 
 ## Keys:
 
-| UI  | keys              |
-| --- | ----------------- |
-| F:  | Toggle FullScreen |
+| UI     | keys              |
+| ------ | ----------------- |
+| F/f11: | Toggle FullScreen |
 
 | MOVEMENT   | keys                |
 | ---------- | ------------------- |

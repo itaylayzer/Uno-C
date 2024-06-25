@@ -179,15 +179,17 @@ void uno_init(GameState state, ubyte start_count)
     {
         dbl_push(&state->player.arr)->val = (dequeue(&state->queue));
         dbl_push(&state->enemy.arr)->val = (dequeue(&state->queue));
+        // dbl_push(&state->player.arr)->val = cn(4, 14);
     }
 }
 
 ///////////////////// conditions /////////////////////
-bool condition_true(GameState state, DBLIST node)
+
+CONDITION_HEADER(condition_true)
 {
     return true;
 }
-bool condition_put(GameState state, DBLIST node)
+CONDITION_HEADER(condition_put)
 {
     bool same_color = (state->card >> 4) == (node->val >> 4);
     bool same_number = (state->card & 0x0f) == (node->val & 0x0f);
@@ -196,54 +198,67 @@ bool condition_put(GameState state, DBLIST node)
 }
 
 ///////////////////// actions /////////////////////
-
+// the action returns bitmap value
+// the 1-4th bits are states bitmap:
+//                  1th bit is change color
+// the 5th bit are done turn
+// the 6-7th bits is direction:
+//       0 negative
+//       1 none
+//       2 positive
 // return 1
-ubyte play_endturn(GameState state, Array *arr, DBLIST *node)
+
+ACTION_HEADER(play_endturn)
 {
     return 1;
 }
 
 // 2  and above if yes and action
 // 0 if not, 1 end streak mode, 2 if nothing, 3 pick color, 4 start streak mode
-ubyte play_put(GameState state, Array *arr, DBLIST *node)
+ACTION_HEADER(play_put)
 {
+
+    ubyte ret, num;
+    bool is_first, is_last, done_turn, change_color;
+
     enqueue(&state->queue, state->card);
     state->card = (*node)->val;
     arr->size--;
-    // puts("play_put A");
-    bool is_first = dbl_node_first(*node);
-    bool is_last = dbl_node_last(*node);
+
+    is_first = dbl_node_first(*node);
+    is_last = dbl_node_last(*node);
 
     if (is_first && is_last)
     {
         free(*node);
         arr->arr = *node = NULL;
-        return 2;
+        return 1 << 5 + 1 << 4 + 0;
     }
-
-    // puts("play_put B");
 
     DBLIST next_node[] = {(*node)->next, (*node)->prev};
     *node = next_node[is_last];
     DBLIST delete_node[] = {(*node)->prev, (*node)->next};
 
-    // puts("play_put C");
     dbl_removes(delete_node[is_last]);
-    // puts("play_put D");
-    // printf("is last:%d\n", is_last);
+
     is_first && (arr->arr = *node);
 
-    return 2 + (is_last << 6);
+    num = state->card & 0x0f;
+    done_turn = num < 10 || num == 13;
+    change_color = num > 12;
+    ret = ((!is_last) << 5) + (done_turn << 4) + change_color;
+    return ret;
 }
 
 // return 2 always
-ubyte play_stack(GameState state, Array *arr, DBLIST *node)
+ACTION_HEADER(play_stack)
 {
+
     dbl_push(&arr->arr)->val = dequeue(&state->queue);
 
     arr->size++;
     (*node) && (*node = (*node)->prev);
     (!*node) && (*node = arr->arr);
 
-    return 2;
+    return (1 << 5) + (1 << 4);
 }
