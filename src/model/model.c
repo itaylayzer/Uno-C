@@ -257,8 +257,8 @@ ACTION_HEADER(play_stack)
     dbl_push(&arr->arr)->val = dequeue(&state->queue);
 
     arr->size++;
-    (*node) && (*node = (*node)->prev);
-    (!*node) && (*node = arr->arr);
+    // (*node) && (*node = (*node)->prev);
+    // (!*node) && (*node = arr->arr);
 
-    return (1 << 5) + (1 << 4);
+    return (2 << 5) + (1 << 4);
 }

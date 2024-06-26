@@ -53,7 +53,7 @@ float calculateTextureY(int index)
     index /= 12;
     return index * text_y;
 }
-void DrawCard(unsigned char number, float hie, float x, float y, float size, float height_multiplier, Texture2D uno_texture, Texture2D txt_header, Texture2D txt_outline)
+void DrawCard(unsigned char number, float hie, float x, float y, float size, float height_multiplier, Texture2D uno_texture)
 {
     Color tempColor;
 
@@ -69,9 +69,9 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
     DrawRectangleRounded((Rectangle){x, y, size, size * height_multiplier}, 0.2f, 10, background);
 
     number > 9 &&
-        (DrawTexturePro(txt_header, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){Outline.r, Outline.g, Outline.b, 255}), 1);
+        (DrawTexturePro(uno_texture, (Rectangle){text_x * 2, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){Outline.r, Outline.g, Outline.b, 255}), 1);
 
-    DrawTexturePro(txt_outline, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){tempColor.a, tempColor.a, tempColor.a, 255});
+    DrawTexturePro(uno_texture, (Rectangle){text_x * 3, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){tempColor.a, tempColor.a, tempColor.a, 255});
     DrawTexturePro(uno_texture, (Rectangle){calculateTextureX(textind), calculateTextureY(textind), text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){background.a, background.a, background.a, 255});
 }
 void displayGame(GameState state,
@@ -98,19 +98,15 @@ void displayGame(GameState state,
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1330, 720, "@ItayL - Uno");
     SetWindowMinSize(800, 600);
-    Image icon = LoadImage("./assets/uno.ico");
-    SetWindowIcon(icon);
 
     Texture2D uno_texture = LoadTexture("./assets/texture.png");
-    Texture2D txt_header = LoadTexture("./assets/white.png");
-    Texture2D txt_outline = LoadTexture("./assets/outline.png");
 
     int width, height;
     Rectangle pre_state;
     float lerpSelected = selected, lerpColoredSelected = color_selected, lerpShowColors = 0;
     bool change_color = false, reset_change_color = false, player_turn = false,
          (*key_pressed)(int) = fixed_key_pressed;
-    const double fps = 60;
+    const double fps = 240;
     SetTargetFPS(fps);
     const float min_size = 70;
     const float max_size = 85;
@@ -216,7 +212,7 @@ void displayGame(GameState state,
 
             const float x = width / 2 + index * min_size * 1.2 - size / 2 - lerpSelected * max_size;
             const float y = height - max_size + -size - 10;
-            DrawCard(node->val, hie_color - change_color * 0.5, x, y, size, height_multiplier, uno_texture, txt_header, txt_outline);
+            DrawCard(node->val, hie_color - change_color * 0.5, x, y, size, height_multiplier, uno_texture);
         };
 
         float addon = (lerpSelected - (float)selected) * min_size;
@@ -227,7 +223,7 @@ void displayGame(GameState state,
         float x = width / 2 - max_size / 2 + addon;
         float y = height / 2 - max_size;
 
-        DrawCard(state->card, 1, x, y, max_size, height_multiplier, uno_texture, txt_header, txt_outline);
+        DrawCard(state->card, 1, x, y, max_size, height_multiplier, uno_texture);
 
         // draw colors ----------------------------------------------------------------------------
 
@@ -265,9 +261,6 @@ void displayGame(GameState state,
     }
 
     UnloadTexture(uno_texture);
-    UnloadTexture(txt_header);
-    UnloadTexture(txt_outline);
-    UnloadImage(icon);
 
     CloseWindow();
 }
