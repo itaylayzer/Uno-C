@@ -23,7 +23,7 @@ void vector_shuffle(ubyte *arr, ubyte size)
 void random_stacking(QUEUE *q)
 {
 
-    const ubyte cards[] = {
+    ubyte cards[] = {
         cn(0, 0),
         cn(1, 0),
         cn(2, 0),
@@ -232,7 +232,7 @@ ACTION_HEADER(play_put)
     {
         free(*node);
         arr->arr = *node = NULL;
-        return 1 << 5 + 1 << 4 + 0;
+        return (1 << 5) + (1 << 4) + 0;
     }
 
     DBLIST next_node[] = {(*node)->next, (*node)->prev};

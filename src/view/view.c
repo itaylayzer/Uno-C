@@ -7,42 +7,12 @@ const Color colors[5] = {
     (Color){55, 168, 76, 255},
     (Color){0, 0, 0, 255},
 };
-float lerp(float a, float b, float f)
-{
-    return a * (1.0 - f) + (b * f);
-}
-float fmax(float x, float y)
-{
-    return x > y ? x : y;
-}
-float fmin(float x, float y)
-{
-    return x > y ? y : x;
-}
-float fclamp(float val, float _min, float _max)
-{
-    return fmax(fmin(val, _max), _min);
-}
-float fabs(float val)
-{
-    return val * (val < 0 ? -1 : 1);
-}
+
 bool fixed_key_pressed(int key)
 {
     return IsKeyPressedRepeat(key) || IsKeyPressed(key);
 }
-int max(int a, int b)
-{
-    return a > b ? a : b;
-}
-int min(int a, int b)
-{
-    return a > b ? b : a;
-}
-int clamp(int val, int _min, int _max)
-{
-    return max(min(val, _max), _min);
-}
+
 float calculateTextureX(int index)
 {
     index %= 12;
@@ -164,7 +134,7 @@ void displayGame(GameState state,
 
         bool _pos = (select_addon = selected - old_select) > 0;
 
-        select_addon = abs(select_addon);
+        select_addon = sabs(select_addon);
         while (select_addon--)
         {
             DBLIST nodes[] = {pnode->prev, pnode->next};

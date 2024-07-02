@@ -1,7 +1,7 @@
 # Makefile for the GCC project
 CC=gcc
 CFLAGS=-g -I.
-LDFLAGS=-lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LDFLAGS=-lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -Wno-builtin-declaration-mismatch
 SRC_DIR=src
 EXE=bin/game
 

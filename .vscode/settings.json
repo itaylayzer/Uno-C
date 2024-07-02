@@ -12,6 +12,7 @@
         "queue.h": "c",
         "stdlib.h": "c",
         "types.h": "c",
-        "model.h": "c"
+        "model.h": "c",
+        "compute.h": "c"
     }
 }

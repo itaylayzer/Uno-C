@@ -4,6 +4,8 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "./mathutils.h"
 #include "../controller/types.h"
 
 #define NUM_CARDS 20 // Number of cards to display

@@ -47,7 +47,7 @@ ubyte dbl_remove_prev(DBLIST node)
 void dbl_removes(DBLIST node)
 {
 
-    ubyte (*remove_fn[])(DBLIST *) = {dbl_remove_prev, dbl_remove_after};
+    ubyte (*remove_fn[])(DBLIST) = {dbl_remove_prev, dbl_remove_after};
     DBLIST vals[] = {node->next, node->prev};
     bool islast = dbl_node_last(node);
     remove_fn[islast](vals[islast]);
