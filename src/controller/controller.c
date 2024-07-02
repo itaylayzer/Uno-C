@@ -13,5 +13,5 @@ void start_uno()
     ACTION_VARIABLE(actions[]) = {NULL, play_stack, play_put, play_endturn, NULL};
     CONDITION_VARIABLE(conditions[]) = {condition_true, condition_true, condition_put, condition_true, condition_true};
 
-    displayGame(&state, conditions, actions);
+    displayGame(&state, conditions, actions, compute_play);
 }

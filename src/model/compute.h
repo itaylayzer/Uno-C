@@ -17,5 +17,6 @@
 #define SCOREFN_VARIABLE(var_name) byte (*var_name)(ubyte, DBLIST, ubyte)
 
 ubyte heauristic_alg(DBLIST array, ubyte leading);
+ubyte prioritise_color(DBLIST hand);
 
 #endif

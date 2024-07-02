@@ -30,7 +30,7 @@ SCOREFN(evaluate_card_matching, {
         colors_counts[e_color(node->val)]++;
         node = node->next;
     }
-    scoreadd 3 * (e_color(card) == e_color(leading) || e_color(card) == 4);
+    scoreadd 3 * (e_color(card) == e_color(leading) || e_color(card) == UNO_BLACK);
     scoreadd 3 * (colors_counts[e_color(card)] == 1 && e_num(card) < 10 && e_num(leading) < 10);
     scoreadd 10 * -(e_num(card) > 12 && colors_counts[e_color(leading)] > 0);
 })
@@ -51,8 +51,8 @@ ubyte heauristic_alg(DBLIST array, ubyte leading)
     while (node)
     {
         score = evaluate_move(node->val, array, leading);
-        (score > best_card) && (best_score = score,
-                                best_card = node->val);
+        (score > best_score) && (best_score = score,
+                                 best_card = node->val);
 
         node = node->next;
     }
@@ -64,7 +64,7 @@ ubyte prioritise_color(DBLIST hand)
     ubyte colors_counts[MAX_COLORS + 1] = {0};
     DBLIST node = hand;
 
-    ubyte best_color = 0, best_color_counts = 0, current;
+    ubyte best_color = UNO_BLACK, best_color_counts = 0, current;
     bool condition;
     while (node)
     {
@@ -72,7 +72,7 @@ ubyte prioritise_color(DBLIST hand)
         colors_counts[current]++;
         node = node->next;
 
-        condition = best_color_counts < colors_counts[current];
+        condition = best_color_counts < colors_counts[current] && current < UNO_BLACK;
 
         best_color_counts = !condition * best_color_counts + condition * colors_counts[current];
         best_color = !condition * best_color + condition * current;

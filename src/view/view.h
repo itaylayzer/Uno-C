@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "./mathutils.h"
 #include "../controller/types.h"
@@ -16,5 +17,6 @@
 
 void displayGame(GameState,
                  CONDITION_VARIABLE([]),
-                 ACTION_VARIABLE([]));
+                 ACTION_VARIABLE([]),
+                 void *(*)(GameState));
 #endif

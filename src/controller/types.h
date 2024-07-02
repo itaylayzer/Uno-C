@@ -1,6 +1,8 @@
 #ifndef _INC_CONTROLLER_TYPES
 #define _INC_CONTROLLER_TYPES
 
+#include <stdbool.h>
+
 #define MAX_COLORS 4
 
 #define ubyte unsigned char
@@ -28,8 +30,8 @@
 ///////////////////// conditions /////////////////////
 // the condition returns boolean value
 
-#define CONDITION_VARIABLE(var_name) bool (*var_name)(GameState, DBLIST)
-#define CONDITION_FUNCTION(func_name) bool func_name(GameState, DBLIST)
+#define CONDITION_VARIABLE(var_name) bool (*var_name)(GameState, ubyte)
+#define CONDITION_FUNCTION(func_name) bool func_name(GameState, ubyte)
 
 typedef struct dblLinkNode
 {
@@ -56,6 +58,7 @@ typedef struct stateType
     Array enemy;
     ubyte card;
     sNode queue;
+    bool player_turn;
 
 } stateRec, *GameState;
 

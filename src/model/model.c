@@ -166,7 +166,7 @@ void uno_init(GameState state, ubyte start_count)
 
     state->card = dequeue(&state->queue);
 
-    // make sure the start card  be a number
+    // make sure the start card be a number
     while ((state->card & 0x0F) / 10)
     {
         enqueue(&state->queue, state->card);
@@ -181,6 +181,8 @@ void uno_init(GameState state, ubyte start_count)
         dbl_push(&state->enemy.arr)->val = (dequeue(&state->queue));
         // dbl_push(&state->player.arr)->val = cn(4, 14);
     }
+
+    state->player_turn = true;
 }
 
 ///////////////////// conditions /////////////////////
@@ -191,9 +193,9 @@ CONDITION_HEADER(condition_true)
 }
 CONDITION_HEADER(condition_put)
 {
-    bool same_color = (state->card >> 4) == (node->val >> 4);
-    bool same_number = (state->card & 0x0f) == (node->val & 0x0f);
-    bool black_color = (node->val >> 4) == UNO_BLACK;
+    bool same_color = (state->card >> 4) == (card >> 4);
+    bool same_number = (state->card & 0x0f) == (card & 0x0f);
+    bool black_color = (card >> 4) == UNO_BLACK;
     return same_color || same_number || black_color;
 }
 
@@ -261,4 +263,60 @@ ACTION_HEADER(play_stack)
     // (!*node) && (*node = arr->arr);
 
     return (2 << 5) + (1 << 4);
+}
+
+// computer player thread
+void *compute_play(GameState state)
+{
+
+    state->player_turn = false;
+    puts("before");
+
+    ubyte card;
+    bool change_turn = false;
+    DBLIST node = state->enemy.arr;
+
+    while (!change_turn)
+    {
+        usleep(1000000);
+        card = heauristic_alg(state->enemy.arr, state->card);
+
+        // card is useable so take from stack
+        if (!condition_put(state, card))
+        {
+            play_stack(state, &state->enemy, NULL);
+            break;
+        }
+
+        // find node
+        while (node->val != card)
+        {
+            node = node->next;
+        }
+
+        ubyte res = play_put(state, &state->enemy, node);
+
+        // change color
+        if (res & 0x01)
+        {
+            usleep(1000000);
+
+            ubyte color = prioritise_color(state->enemy.arr);
+            state->card = (color << 4) + (state->card & 0x0f);
+        }
+
+        // stop turning
+        if ((res >> 4) & 0x01)
+        {
+            break;
+        }
+    }
+
+    usleep(1000000);
+
+    puts("after");
+
+    state->player_turn = true;
+
+    // return NULL;
 }

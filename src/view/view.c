@@ -30,7 +30,7 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
     const unsigned char texture_indexes[15] = {21, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 1, 6};
 
     memcpy(&tempColor, colors + (number >> 4), sizeof(Color));
-    tempColor.a = hie * 150 + 105;
+    tempColor.a = hie * 180 + 75;
     number = number & 0x0F;
     Color background = number <= 12 ? tempColor : (Color){255, 255, 255, tempColor.a};
     Color Outline = number <= 12 ? (Color){0, 0, 0, tempColor.a} : tempColor;
@@ -44,9 +44,19 @@ void DrawCard(unsigned char number, float hie, float x, float y, float size, flo
     DrawTexturePro(uno_texture, (Rectangle){text_x * 3, 0, text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){tempColor.a, tempColor.a, tempColor.a, 255});
     DrawTexturePro(uno_texture, (Rectangle){calculateTextureX(textind), calculateTextureY(textind), text_x, text_y}, (Rectangle){x, y, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){background.a, background.a, background.a, 255});
 }
+
+bool start_thread(void *(*compute_play)(GameState),
+                  GameState state)
+{
+
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, compute_play, state);
+}
+
 void displayGame(GameState state,
                  CONDITION_VARIABLE(conditions[]),
-                 ACTION_VARIABLE(actions[]))
+                 ACTION_VARIABLE(actions[]),
+                 void *(*compute_play)(GameState))
 
 {
 
@@ -73,8 +83,8 @@ void displayGame(GameState state,
 
     int width, height;
     Rectangle pre_state;
-    float lerpSelected = selected, lerpColoredSelected = color_selected, lerpShowColors = 0;
-    bool change_color = false, reset_change_color = false, player_turn = false,
+    float lerpSelected = selected, lerpColoredSelected = color_selected, lerpShowColors = 0, lerpTurn = 0;
+    bool change_color = false, reset_change_color = false,
          (*key_pressed)(int) = fixed_key_pressed;
     const double fps = 240;
     SetTargetFPS(fps);
@@ -103,21 +113,19 @@ void displayGame(GameState state,
         CONDITION_VARIABLE(selected_condition) = conditions[action_index];
         ACTION_VARIABLE(selected_action) = actions[action_index];
 
-        if (selected_action != NULL && selected_condition(state, pnode) && !change_color)
+        if (selected_action != NULL && selected_condition(state, pnode->val) && !change_color && state->player_turn)
         {
             ubyte action_avl = selected_action(state, &state->player, &pnode);
             change_color = (action_avl & 0x01);
             bool end_turn;
 
-            (end_turn = (action_avl >> 4) & 0x01) &&
-                (player_turn = !player_turn);
+            (end_turn = (action_avl >> 4) & 0x01) && start_thread(compute_play, state);
             byte direction = (action_avl >> 5) - 1;
 
             selected += direction;
         }
 
-        bool space_pressed = IsKeyPressed(KEY_SPACE);
-        if (space_pressed && change_color && reset_change_color)
+        if (IsKeyPressed(KEY_SPACE) && change_color && reset_change_color && state->player_turn)
         {
             change_color = false;
             state->card = (color_selected << 4) + (state->card & 0x0f);
@@ -145,6 +153,7 @@ void displayGame(GameState state,
         lerpSelected = lerp(lerpSelected, (float)selected, 12.0f / fps);
         lerpColoredSelected = lerp(lerpColoredSelected, (float)color_selected, 12.0f / fps);
         lerpShowColors = lerp(lerpShowColors, (float)change_color, 12.0f / fps);
+        lerpTurn = lerp(lerpTurn, (float)!state->player_turn, 12.0f / fps);
 
         // change full screen ----------------------------------------------------------------------------
         // found this solution online
@@ -175,12 +184,12 @@ void displayGame(GameState state,
         {
             // hie is a cool variable name for misleading ppls
             const float hie = fabs(fclamp((float)index - lerpSelected, -1.0, 1.0));
-            const float hie_color = conditions[2](state, node);
+            const float hie_color = conditions[2](state, node->val) * 0.5 + state->player_turn * conditions[2](state, node->val) * 0.5;
 
             const float downscale = hie * (min_size - max_size);
-            const float size = downscale + max_size;
+            const float size = downscale + max_size - lerpTurn * 5;
 
-            const float x = width / 2 + index * min_size * 1.2 - size / 2 - lerpSelected * max_size;
+            const float x = width / 2 + index * (min_size - lerpTurn * 5) * 1.2 - size / 2 - lerpSelected * max_size;
             const float y = height - max_size + -size - 10;
             DrawCard(node->val, hie_color - change_color * 0.5, x, y, size, height_multiplier, uno_texture);
         };
