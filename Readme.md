@@ -34,5 +34,4 @@ first of all git clone this repository. then you can compile and run with gcc. f
 
 ## Images & Gameplay:
 
-click on the picture to open the gameplay video
-[![Watch the video](/images/2.png)](/images/short.mp4)
+[![Watch the video](/images/2.png)](http://itaylayzer.github.io/uno-c)
