@@ -42,23 +42,23 @@ byte evaluate_move(ubyte card, DBLIST hand, ubyte leading)
     return scorefns[e_num(card) > 9 && e_num(card) < 13](card, hand, leading);
 }
 
-ubyte heauristic_alg(DBLIST array, ubyte leading)
+DBLIST heauristic_alg(DBLIST array, ubyte leading)
 {
-    ubyte best_card = -1;
+
     byte score, best_score = 1 << 7;
 
-    DBLIST node = array;
+    DBLIST node = array, best_node = NULL;
     while (node)
     {
         printf("\t\tnode %d (%d)\n", e_num(node->val), e_color(node->val));
         score = evaluate_move(node->val, array, leading);
         (score > best_score) && (best_score = score,
-                                 best_card = node->val);
+                                 best_node = node);
 
         node = node->next;
     }
 
-    return best_card;
+    return best_node;
 }
 ubyte prioritise_color(DBLIST hand)
 {

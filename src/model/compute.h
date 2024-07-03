@@ -3,6 +3,7 @@
 #define _INC_COMPUTE
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "../controller/types.h"
 
@@ -16,7 +17,7 @@
 #define scoreadd score +=
 #define SCOREFN_VARIABLE(var_name) byte (*var_name)(ubyte, DBLIST, ubyte)
 
-ubyte heauristic_alg(DBLIST array, ubyte leading);
+DBLIST heauristic_alg(DBLIST array, ubyte leading);
 ubyte prioritise_color(DBLIST hand);
 
 #endif

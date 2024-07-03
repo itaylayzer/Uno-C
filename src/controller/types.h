@@ -16,13 +16,14 @@
 
 ///////////////////// actions /////////////////////
 // the action returns bitmap value
-// the 1-4th bits are states bitmap:
-//                  1th bit is change color
+// 1th bit is change color
+// 2th bit is done game
 // the 5th bit are done turn
 // the 6-7th bits is direction:
 //       0 negative
 //       1 none
 //       2 positive
+// return 1
 
 #define ACTION_VARIABLE(var_name) ubyte (*var_name)(GameState, Array *, Array *, DBLIST *)
 #define ACTION_FUNCTION(func_name) ubyte func_name(GameState, Array *, Array *, DBLIST *)
@@ -59,6 +60,7 @@ typedef struct stateType
     ubyte card;
     sNode queue;
     bool player_turn;
+    ubyte selected;
 
 } stateRec, *GameState;
 

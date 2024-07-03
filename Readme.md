@@ -16,22 +16,23 @@ first of all git clone this repository. then you can compile and run with gcc. f
 
 | UI     | keys              |
 | ------ | ----------------- |
-| F/f11: | Toggle FullScreen |
+| f/f11: | Toggle FullScreen |
 
 | MOVEMENT   | keys                |
 | ---------- | ------------------- |
-| G:         | 5 steps back        |
-| LEFT/A/H:  | step back           |
-| RIGHT/D/J: | step forward        |
-| K:         | 5 steps forwards    |
+| g:         | 5 steps back        |
+| left/a/h:  | step back           |
+| right/d/j: | step forward        |
+| k:         | 5 steps forwards    |
 | 1-9:       | moving in direction |
 | -/+:       | changing direction  |
 
-| GAMEPLAY | keys                |
-| -------- | ------------------- |
-| m/b/c:   | take card from bank |
-| space/x: | pieck to put        |
+| GAMEPLAY    | keys                |
+| ----------- | ------------------- |
+| m/b/c/down: | take card from bank |
+| space/x/up: | pieck to put        |
 
-## Images:
+## Images & Gameplay:
 
-![1.png](/images/1.png)
+click on the picture to open the gameplay video
+[![Watch the video](/images/2.png)](/images/short.mp4)

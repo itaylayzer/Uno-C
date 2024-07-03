@@ -201,8 +201,8 @@ CONDITION_HEADER(condition_put)
 
 ///////////////////// actions /////////////////////
 // the action returns bitmap value
-// the 1-4th bits are states bitmap:
-//                  1th bit is change color
+// 1th bit is change color
+// 2th bit is done game
 // the 5th bit are done turn
 // the 6-7th bits is direction:
 //       0 negative
@@ -210,31 +210,37 @@ CONDITION_HEADER(condition_put)
 //       2 positive
 // return 1
 
-ACTION_HEADER(play_endturn)
-{
-    return 1;
-}
-
 // 2  and above if yes and action
 // 0 if not, 1 end streak mode, 2 if nothing, 3 pick color, 4 start streak mode
 ACTION_HEADER(play_put)
 {
 
     ubyte ret, num;
-    bool is_first, is_last, done_turn, change_color;
+    bool is_first, is_last, done_turn, change_color, twoplus, fourplus;
 
     enqueue(&state->queue, state->card);
     state->card = (*node)->val;
     arr->size--;
 
+    num = state->card & 0x0f;
+
     is_first = dbl_node_first(*node);
     is_last = dbl_node_last(*node);
+
+    done_turn = num < 10 || num == 13;
+    change_color = num > 12;
+    twoplus = num == 10;
+    fourplus = num == 14;
+
+    ret = ((!is_last) << 5) + (done_turn << 4) + change_color;
 
     if (is_first && is_last)
     {
         free(*node);
         arr->arr = *node = NULL;
-        return (1 << 5) + (1 << 4) + 0;
+
+        // if dont turn, well the game is finished!
+        return ret + (done_turn << 1);
     }
 
     DBLIST next_node[] = {(*node)->next, (*node)->prev};
@@ -245,16 +251,13 @@ ACTION_HEADER(play_put)
 
     is_first && (arr->arr = *node);
 
-    num = state->card & 0x0f;
-    done_turn = num < 10 || num == 13;
-    change_color = num > 12;
-    ret = ((!is_last) << 5) + (done_turn << 4) + change_color;
-
     // move cards if its takes2 or takes4
-    unsigned char times_to_move_to_other = (0.5 * num - 3) * (num == 10 || num == 14);
+    unsigned char times_to_move_to_other = (0.5 * num - 3) * (twoplus || fourplus);
     while (times_to_move_to_other--)
     {
         play_stack(state, other, NULL, NULL);
+
+        (!state->player_turn && !times_to_move_to_other) && (state->selected += fourplus * 4 + twoplus * 2);
     }
 
     return ret;
@@ -268,7 +271,7 @@ ACTION_HEADER(play_stack)
 
     arr->size++;
     // (*node) && (*node = (*node)->prev);
-    // (!*node) && (*node = arr->arr);
+    // (node && !*node) && (*node = arr->arr);
 
     return (2 << 5) + (1 << 4);
 }
@@ -282,29 +285,23 @@ void *compute_play(GameState state)
 
     ubyte card;
     bool change_turn = false;
-    DBLIST node = state->enemy.arr;
+    DBLIST node;
 
     while (!change_turn)
     {
         usleep(800000);
         puts("\theauristic");
-        card = heauristic_alg(state->enemy.arr, state->card);
+        node = heauristic_alg(state->enemy.arr, state->card);
 
         // card is useable so take from stack
         puts("\tcondition_put");
-        printf("\tcard=%d(%d)\n", card & 0x0f, card >> 4);
-        if (!condition_put(state, card))
+        printf("\tcard=%d(%d)\n", node->val & 0x0f, node->val >> 4);
+        if (!node || !condition_put(state, node->val))
         {
             play_stack(state, &state->enemy, &state->player, NULL);
             break;
         }
-        puts("\tfind node");
 
-        // find node
-        while (node->val != card && node)
-        {
-            node = node->next;
-        }
         printf("\tcard=%d(%d)\n", node->val & 0x0f, node->val >> 4);
 
         if (!node)
@@ -315,21 +312,21 @@ void *compute_play(GameState state)
         ubyte res = play_put(state, &state->enemy, &state->player, &node);
 
         // change color
-        puts("\tchange color");
 
         if (res & 0x01)
         {
+            puts("\tchange color");
             usleep(800000);
 
             ubyte color = prioritise_color(state->enemy.arr);
             state->card = (color << 4) + (state->card & 0x0f);
         }
 
-        puts("\tstop turning");
-
         // stop turning
         if ((res >> 4) & 0x01)
         {
+            puts("\tstop turning");
+
             break;
         }
     }

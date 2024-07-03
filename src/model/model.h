@@ -20,7 +20,6 @@ CONDITION_FUNCTION(condition_true);
 CONDITION_FUNCTION(condition_put);
 
 // actions
-ACTION_FUNCTION(play_endturn);
 ACTION_FUNCTION(play_put);
 ACTION_FUNCTION(play_stack);
 
