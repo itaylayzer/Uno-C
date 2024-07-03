@@ -11,7 +11,7 @@
 #include "../controller/types.h"
 
 #define CONDITION_HEADER(func_name) bool func_name(GameState state, ubyte card)
-#define ACTION_HEADER(func_name) ubyte func_name(GameState state, Array *arr, DBLIST *node)
+#define ACTION_HEADER(func_name) ubyte func_name(GameState state, Array *arr, Array *other, DBLIST *node)
 
 void uno_init(GameState, ubyte);
 

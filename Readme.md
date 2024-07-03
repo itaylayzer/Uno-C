@@ -31,7 +31,6 @@ first of all git clone this repository. then you can compile and run with gcc. f
 | -------- | ------------------- |
 | m/b/c:   | take card from bank |
 | space/x: | pieck to put        |
-| e/z:     | end turn            |
 
 ## Images:
 

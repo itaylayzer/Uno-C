@@ -24,8 +24,8 @@
 //       1 none
 //       2 positive
 
-#define ACTION_VARIABLE(var_name) ubyte (*var_name)(GameState, Array *, DBLIST *)
-#define ACTION_FUNCTION(func_name) ubyte func_name(GameState, Array *, DBLIST *)
+#define ACTION_VARIABLE(var_name) ubyte (*var_name)(GameState, Array *, Array *, DBLIST *)
+#define ACTION_FUNCTION(func_name) ubyte func_name(GameState, Array *, Array *, DBLIST *)
 
 ///////////////////// conditions /////////////////////
 // the condition returns boolean value

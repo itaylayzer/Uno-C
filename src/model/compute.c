@@ -3,7 +3,7 @@
 // extract functions
 ubyte e_num(ubyte card)
 {
-    return card & 0x0f;
+    return (card & 0x0f);
 }
 ubyte e_color(ubyte card)
 {
@@ -50,6 +50,7 @@ ubyte heauristic_alg(DBLIST array, ubyte leading)
     DBLIST node = array;
     while (node)
     {
+        printf("\t\tnode %d (%d)\n", e_num(node->val), e_color(node->val));
         score = evaluate_move(node->val, array, leading);
         (score > best_score) && (best_score = score,
                                  best_card = node->val);

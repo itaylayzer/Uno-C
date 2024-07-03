@@ -249,6 +249,14 @@ ACTION_HEADER(play_put)
     done_turn = num < 10 || num == 13;
     change_color = num > 12;
     ret = ((!is_last) << 5) + (done_turn << 4) + change_color;
+
+    // move cards if its takes2 or takes4
+    unsigned char times_to_move_to_other = (0.5 * num - 3) * (num == 10 || num == 14);
+    while (times_to_move_to_other--)
+    {
+        play_stack(state, other, NULL, NULL);
+    }
+
     return ret;
 }
 
@@ -278,32 +286,46 @@ void *compute_play(GameState state)
 
     while (!change_turn)
     {
-        usleep(1000000);
+        usleep(800000);
+        puts("\theauristic");
         card = heauristic_alg(state->enemy.arr, state->card);
 
         // card is useable so take from stack
+        puts("\tcondition_put");
+        printf("\tcard=%d(%d)\n", card & 0x0f, card >> 4);
         if (!condition_put(state, card))
         {
-            play_stack(state, &state->enemy, NULL);
+            play_stack(state, &state->enemy, &state->player, NULL);
             break;
         }
+        puts("\tfind node");
 
         // find node
-        while (node->val != card)
+        while (node->val != card && node)
         {
             node = node->next;
         }
+        printf("\tcard=%d(%d)\n", node->val & 0x0f, node->val >> 4);
 
-        ubyte res = play_put(state, &state->enemy, node);
+        if (!node)
+        {
+            break;
+        }
+        puts("\tplay_put");
+        ubyte res = play_put(state, &state->enemy, &state->player, &node);
 
         // change color
+        puts("\tchange color");
+
         if (res & 0x01)
         {
-            usleep(1000000);
+            usleep(800000);
 
             ubyte color = prioritise_color(state->enemy.arr);
             state->card = (color << 4) + (state->card & 0x0f);
         }
+
+        puts("\tstop turning");
 
         // stop turning
         if ((res >> 4) & 0x01)
@@ -312,7 +334,7 @@ void *compute_play(GameState state)
         }
     }
 
-    usleep(1000000);
+    usleep(800000);
 
     puts("after");
 

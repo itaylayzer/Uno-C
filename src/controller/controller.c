@@ -10,8 +10,8 @@ void start_uno()
     uno_init(&state, 7);
 
     // actions & conditions
-    ACTION_VARIABLE(actions[]) = {NULL, play_stack, play_put, play_endturn, NULL};
-    CONDITION_VARIABLE(conditions[]) = {condition_true, condition_true, condition_put, condition_true, condition_true};
+    ACTION_VARIABLE(actions[]) = {NULL, play_stack, play_put,  NULL};
+    CONDITION_VARIABLE(conditions[]) = {condition_true, condition_true, condition_put, condition_true};
 
     displayGame(&state, conditions, actions, compute_play);
 }

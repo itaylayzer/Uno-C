@@ -83,8 +83,8 @@ void displayGame(GameState state,
 
     int width, height;
     Rectangle pre_state;
-    float lerpSelected = selected, lerpColoredSelected = color_selected, lerpShowColors = 0, lerpTurn = 0;
-    bool change_color = false, reset_change_color = false,
+    float lerpSelected = selected, lerpColoredSelected = color_selected, lerpShowColors = 0, lerpPlayerTurn = 0, lerpEnemyTurn = 0;
+    bool change_color = false, reset_change_color = false, start_enemy_after_color = false,
          (*key_pressed)(int) = fixed_key_pressed;
     const double fps = 240;
     SetTargetFPS(fps);
@@ -108,20 +108,23 @@ void displayGame(GameState state,
         }
 
         ubyte action_index = clamp(
-            (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)) + 3 * (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Z)), 0, 4);
+            (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C)) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X)), 0, 4);
 
         CONDITION_VARIABLE(selected_condition) = conditions[action_index];
         ACTION_VARIABLE(selected_action) = actions[action_index];
 
         if (selected_action != NULL && selected_condition(state, pnode->val) && !change_color && state->player_turn)
         {
-            ubyte action_avl = selected_action(state, &state->player, &pnode);
+            ubyte action_avl = selected_action(state, &state->player, &state->enemy, &pnode);
             change_color = (action_avl & 0x01);
             bool end_turn;
 
-            (end_turn = (action_avl >> 4) & 0x01) && start_thread(compute_play, state);
-            byte direction = (action_avl >> 5) - 1;
+            end_turn = (action_avl >> 4) & 0x01;
+            start_enemy_after_color = change_color && end_turn;
 
+            (!change_color && end_turn) && (start_thread(compute_play, state));
+
+            byte direction = (action_avl >> 5) - 1;
             selected += direction;
         }
 
@@ -129,6 +132,8 @@ void displayGame(GameState state,
         {
             change_color = false;
             state->card = (color_selected << 4) + (state->card & 0x0f);
+
+            (start_enemy_after_color) && (start_enemy_after_color = false, start_thread(compute_play, state));
         }
 
         short select_addon, old_select = selected, _movement = 0;
@@ -153,7 +158,8 @@ void displayGame(GameState state,
         lerpSelected = lerp(lerpSelected, (float)selected, 12.0f / fps);
         lerpColoredSelected = lerp(lerpColoredSelected, (float)color_selected, 12.0f / fps);
         lerpShowColors = lerp(lerpShowColors, (float)change_color, 12.0f / fps);
-        lerpTurn = lerp(lerpTurn, (float)!state->player_turn, 12.0f / fps);
+        lerpEnemyTurn = lerp(lerpEnemyTurn, !(float)state->player_turn, 12.0f / fps);
+        lerpPlayerTurn = lerp(lerpPlayerTurn, (float)state->player_turn, 12.0f / fps);
 
         // change full screen ----------------------------------------------------------------------------
         // found this solution online
@@ -186,10 +192,11 @@ void displayGame(GameState state,
             const float hie = fabs(fclamp((float)index - lerpSelected, -1.0, 1.0));
             const float hie_color = conditions[2](state, node->val) * 0.5 + state->player_turn * conditions[2](state, node->val) * 0.5;
 
+            const float lerpTurn = lerpEnemyTurn * 8;
             const float downscale = hie * (min_size - max_size);
-            const float size = downscale + max_size - lerpTurn * 5;
+            const float size = downscale + max_size - lerpTurn;
 
-            const float x = width / 2 + index * (min_size - lerpTurn * 5) * 1.2 - size / 2 - lerpSelected * max_size;
+            const float x = width / 2 + index * (min_size - lerpTurn) * 1.2 - size / 2 - lerpSelected * (max_size - lerpTurn);
             const float y = height - max_size + -size - 10;
             DrawCard(node->val, hie_color - change_color * 0.5, x, y, size, height_multiplier, uno_texture);
         };
@@ -208,7 +215,6 @@ void displayGame(GameState state,
 
         for (unsigned char color_offset = 0; color_offset < MAX_COLORS; color_offset++)
         {
-
             const float size = max_size + fabs(fclamp(lerpColoredSelected - color_offset, -1, 1)) * (min_size - max_size);
             const float _y = height / 2 + 80 - size / 8;
             const float _x = width / 2 - size / 2 - (lerpColoredSelected - color_offset) * size * 1.2;
@@ -225,14 +231,29 @@ void displayGame(GameState state,
         // draw enemy ----------------------------------------------------------------------------
         for (unsigned int index = 0; index < state->enemy.size; index++)
         {
-            const float x = addon + width / 2 - min_size / 2 + index * min_size * 1.2 - (((float)state->enemy.size - 1) / 2.0f) * max_size;
+            const float lerpTurn = lerpPlayerTurn * 8;
+            const float size = min_size - lerpTurn;
+            const float x = addon + width / 2 - size / 2 + index * size * 1.2 - (((float)state->enemy.size - 1) / 2.0f) * (max_size - lerpTurn);
 
-            const float enemyy = min_size - min_size + 10;
+            const float enemyy = -size + 100;
             Color tempColor = (Color){200, 55, 55, 255};
 
             tempColor.a = 105;
 
-            DrawTexturePro(uno_texture, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, enemyy, min_size, min_size * height_multiplier}, (Vector2){0, 0}, 0, (Color){120, 120, 120, 250});
+            DrawTexturePro(uno_texture, (Rectangle){0, 0, text_x, text_y}, (Rectangle){x, enemyy, size, size * height_multiplier}, (Vector2){0, 0}, 0, (Color){120, 120, 120, 250});
+        }
+
+        // draw turn rectangels ----------------------------------------------------------------------------
+        {
+            float x = width / 2 - max_size / 2 + addon + (max_size - min_size) / 2;
+            float y = height / 2 - max_size - 15;
+
+            Color _color = {255, 255, 255, lerpEnemyTurn * 180 + 75};
+
+            DrawRectangleRounded((Rectangle){x, y, min_size, 5}, 2, 10, _color);
+            _color.a = lerpPlayerTurn * 180 + 75;
+
+            DrawRectangleRounded((Rectangle){x, y + max_size * height_multiplier + 25, min_size, 5}, 2, 10, _color);
         }
         reset_change_color = change_color;
 
