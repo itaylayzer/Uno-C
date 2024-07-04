@@ -109,7 +109,7 @@ void displayGame(GameState state,
         }
 
         ubyte action_index = clamp(
-            (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C) || (IsKeyPressed(KEY_DOWN))) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X) || IsKeyPressed(KEY_UP)), 0, 4);
+            (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_B) || IsKeyPressed(KEY_C) || (IsKeyPressed(KEY_DOWN))) + 2 * (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_X) || IsKeyPressed(KEY_UP)), 0, 3);
 
         CONDITION_VARIABLE(selected_condition) = conditions[action_index];
         ACTION_VARIABLE(selected_action) = actions[action_index];
