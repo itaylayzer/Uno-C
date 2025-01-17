@@ -12,6 +12,26 @@ first of all git clone this repository. then you can compile and run with gcc. f
 | `make run`    | to build and run the binary file      |
 | `make single` | to run the binary file                |
 
+## to build & run
+This project uses CMake.
+
+### Building project
+1. Creating build folder
+2. CD to build folder
+3. Run CMake 
+4. Run Makefile
+
+here a script to do so 
+```bash
+mkdir -p build
+cd build
+cmake ..
+make
+```
+
+### Runnning
+now after building we have Uno-C binary file. so in linux do `./Uno-C`
+
 ## Keys:
 
 | UI     | keys              |
